@@ -19,6 +19,25 @@
                 opacity: 1;
             }
         }
+
+        .copy-animation {
+            animation: copyAnimation 1s ease-in-out;
+        }
+
+        @keyframes copyAnimation {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="bg-black text-green-500 h-screen flex flex-col items-center justify-center">
@@ -41,7 +60,6 @@
             <p class="text-sm sm:text-base">Forget about spam, advertising mailings, hacking and attacking robots. Keep your real mailbox clean and secure. Temp Mail provides temporary, secure, anonymous, free, disposable email address.</p>
         </div>
 
-        <!-- Button layout modified for mobile -->
         <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
             <button onclick="copyEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
                 <i class="fas fa-copy"></i>
@@ -57,7 +75,6 @@
             </button>
         </div>
 
-        <!-- Overflow and table scroll handling -->
         <div class="bg-gray-800 rounded-lg shadow-lg p-4 flex-grow overflow-x-auto">
             <table class="w-full table-auto">
                 <thead>
@@ -78,7 +95,6 @@
         </div>
     </div>
 
-    <!-- Fullscreen Menu -->
     <div id="fullscreen-menu" class="fixed inset-0 bg-gray-900 bg-opacity-95 text-green-500 hidden z-50">
         <div class="flex flex-col items-center justify-center h-full space-y-4">
             <button onclick="closeMenu()" class="absolute top-4 right-4 bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
@@ -91,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Fullscreen Menu Content -->
     <div id="fullscreen-menu-content" class="fixed inset-0 bg-gray-900 bg-opacity-95 text-green-500 hidden z-50 overflow-y-auto">
         <div class="flex flex-col items-center justify-center h-full space-y-4 fade-in">
             <button onclick="backToMenu()" class="absolute top-4 right-4 bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
@@ -225,7 +240,6 @@
                 <p class="text-sm sm:text-base">Forget about spam, advertising mailings, hacking and attacking robots. Keep your real mailbox clean and secure. Temp Mail provides temporary, secure, anonymous, free, disposable email address.</p>
             </div>
 
-            <!-- Button layout modified for mobile -->
             <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
                 <button onclick="copyEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
                     <i class="fas fa-copy"></i>
@@ -241,7 +255,6 @@
                 </button>
             </div>
 
-            <!-- Overflow and table scroll handling -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-4 flex-grow overflow-x-auto">
                 <table class="w-full table-auto">
                     <thead>
@@ -268,7 +281,11 @@
         function copyEmail() {
           const addr = $("#addr").val();
           navigator.clipboard.writeText(addr).then(() => {
-            alert("Email address copied to clipboard!");
+            const copyButton = $("button:contains('Copy')");
+            copyButton.addClass("copy-animation");
+            setTimeout(() => {
+              copyButton.removeClass("copy-animation");
+            }, 1000);
           });
         }
 
