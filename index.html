@@ -39,13 +39,70 @@
             }
         }
     </style>
+    <script>
+        const translations = {
+            en: {
+                title: 'Temp Mail',
+                description: 'Forget about spam, advertising mailings, hacking and attacking robots. Keep your real mailbox clean and secure. Temp Mail provides temporary, secure, anonymous, free, disposable email address.',
+                copy: 'Copy',
+                refresh: 'Refresh',
+                change: 'Change',
+                emptyInbox: 'Your inbox is empty',
+                waiting: 'Waiting for incoming emails',
+                loading: 'Loading...',
+                about: 'About',
+                developer: 'Developer',
+                version: 'Version',
+                followGithub: 'Follow me on GitHub',
+                emailDetails: 'Email Details',
+                back: 'Back',
+                aboutTitle: 'About This Website',
+                aboutContent: 'This website provides temporary, secure, anonymous, free, disposable email addresses. Forget about spam, advertising mailings, hacking, and attacking robots. Keep your real mailbox clean and secure.',
+                developerTitle: 'Developer',
+                developerContent: 'This website was developed by mowhn.',
+                versionTitle: 'Version',
+                versionContent: 'Current version: 1.1.0',
+                mail: 'Mail',
+                yourTempEmail: 'Your Temporary Email Address',
+                pleaseGenerate: 'Please generate or input an email address first!'
+            },
+            zh: {
+                title: '临时邮箱',
+                description: '告别垃圾邮件、广告邮件、黑客和攻击机器人。保持您的真实邮箱清洁和安全。临时邮箱提供临时、安全、匿名、免费、一次性的电子邮件地址。',
+                copy: '复制',
+                refresh: '刷新',
+                change: '更换',
+                emptyInbox: '您的收件箱是空的',
+                waiting: '等待收到邮件',
+                loading: '加载中...',
+                about: '关于',
+                developer: '开发者',
+                version: '版本',
+                followGithub: '在GitHub上关注我',
+                emailDetails: '邮件详情',
+                back: '返回',
+                aboutTitle: '关于本网站',
+                aboutContent: '本网站提供临时、安全、匿名、免费、一次性的电子邮件地址。告别垃圾邮件、广告邮件、黑客和攻击机器人，保持您的真实邮箱清洁和安全。',
+                developerTitle: '开发者',
+                developerContent: '本网站由 mowhn 开发。',
+                versionTitle: '版本',
+                versionContent: '当前版本：1.1.0',
+                mail: '邮件',
+                yourTempEmail: '您的临时邮箱地址',
+                pleaseGenerate: '请先生成或输入邮箱地址！'
+            }
+        };
+    </script>
 </head>
 <body class="bg-black text-green-500 h-screen flex flex-col items-center justify-center">
 
     <div id="main-content" class="bg-gray-900 text-green-500 p-6 rounded-lg shadow-lg w-full max-w-4xl h-full flex flex-col justify-between">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-xl font-semibold">Temp Mail</h1>
-            <div class="relative">
+            <h1 class="text-xl font-semibold" id="page-title">Temp Mail</h1>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleLanguage()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                    <i class="fas fa-language"></i>
+                </button>
                 <button id="menu-button" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -79,7 +136,7 @@
             <table class="w-full table-auto">
                 <thead>
                     <tr class="bg-gray-700 text-green-500 p-2 rounded-t-lg">
-                        <th class="p-2 text-xs sm:text-sm">Mail</th>
+                        <th class="p-2 text-xs sm:text-sm" id="mail-header">Mail</th>
                     </tr>
                 </thead>
                 <tbody id="emails" class="text-gray-400">
@@ -118,11 +175,13 @@
 
     <script>
         let currentEmail = localStorage.getItem('currentEmail') || '';
+        let currentLang = localStorage.getItem('language') || 'en';
 
         function getUserAndDomain() {
           const addr = $("#addr").val();
           if (!addr) {
-            alert("Please generate or input an email address first!");
+            const t = translations[currentLang];
+            alert(t.pleaseGenerate);
             return null;
           }
 
@@ -143,51 +202,53 @@
         }
 
         function refreshMail() {
-          const { user, domain } = getUserAndDomain();
+            const { user, domain } = getUserAndDomain();
+            if (!user || !domain) return;
 
-          if (!user || !domain) return;
-
-          const emailsElement = $("#emails");
-          emailsElement.empty();
-          emailsElement.append(`
-            <tr>
-              <td class="text-center p-6">
-                <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
-                <p class="text-lg">Loading...</p>
-              </td>
-            </tr>
-          `);
-
-          $.getJSON(
-            `https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${domain}`,
-            (emails) => {
-              emailsElement.empty();
-
-              if (emails.length === 0) {
-                emailsElement.append(`
-                  <tr>
+            const t = translations[currentLang];
+            const emailsElement = $("#emails");
+            emailsElement.empty();
+            emailsElement.append(`
+                <tr>
                     <td class="text-center p-6">
-                      <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
-                      <p class="text-lg">Your inbox is empty</p>
-                      <p>Waiting for incoming emails</p>
+                        <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                        <p class="text-lg">${t.loading}</p>
                     </td>
-                  </tr>
-                `);
-              } else {
-                for (const email of emails) {
-                  emailsElement.append(`
-                    <tr>
-                      <td class="p-2 text-xs sm:text-sm break-words">
-                        <a href="javascript:void(0)" onclick="viewEmail('${email.id}', '${email.from}', '${email.subject}', '${email.date}')">
-                          ${email.subject} - ${email.from}
-                        </a>
-                      </td>
-                    </tr>
-                  `);
+                </tr>
+            `);
+
+            $.getJSON(
+                `https://www.1secmail.com/api/v1/?action=getMessages&login=${user}&domain=${domain}`,
+                (emails) => {
+                    emailsElement.empty();
+
+                    if (emails.length === 0) {
+                        emailsElement.append(`
+                            <tr>
+                                <td class="text-center p-6 w-full">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
+                                        <p class="text-lg">${t.emptyInbox}</p>
+                                        <p>${t.waiting}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        `);
+                    } else {
+                        for (const email of emails) {
+                            emailsElement.append(`
+                                <tr>
+                                    <td class="p-2 text-xs sm:text-sm break-words">
+                                        <a href="javascript:void(0)" onclick="viewEmail('${email.id}', '${email.from}', '${email.subject}', '${email.date}')">
+                                            ${email.subject} - ${email.from}
+                                        </a>
+                                    </td>
+                                </tr>
+                            `);
+                        }
+                    }
                 }
-              }
-            }
-          );
+            );
         }
 
         function viewEmail(id, from, subject, date) {
@@ -222,60 +283,66 @@
         }
 
         function goBack() {
-          $('#main-content').html(`
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-semibold">Your Temporary Email Address</h1>
-                <div class="relative">
-                    <button id="menu-button" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
-                        <i class="fas fa-bars"></i>
+            const t = translations[currentLang];
+            $('#main-content').html(`
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-xl font-semibold" id="page-title">${t.title}</h1>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="toggleLanguage()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                            <i class="fas fa-language"></i>
+                        </button>
+                        <button id="menu-button" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-4 rounded-lg flex items-center justify-between mb-4">
+                    <input id="addr" class="bg-transparent text-lg w-full outline-none" readonly value="${currentEmail}">
+                </div>
+
+                <div class="text-center text-gray-400 mb-6">
+                    <p class="text-sm sm:text-base">${t.description}</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
+                    <button onclick="copyEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                        <i class="fas fa-copy"></i>
+                        <span>${t.copy}</span>
+                    </button>
+                    <button onclick="refreshMail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>${t.refresh}</span>
+                    </button>
+                    <button onclick="genEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>${t.change}</span>
                     </button>
                 </div>
-            </div>
 
-            <div class="bg-gray-800 p-4 rounded-lg flex items-center justify-between mb-4">
-                <input id="addr" class="bg-transparent text-lg w-full outline-none" readonly value="${currentEmail}">
-            </div>
-
-            <div class="text-center text-gray-400 mb-6">
-                <p class="text-sm sm:text-base">Forget about spam, advertising mailings, hacking and attacking robots. Keep your real mailbox clean and secure. Temp Mail provides temporary, secure, anonymous, free, disposable email address.</p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6">
-                <button onclick="copyEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
-                    <i class="fas fa-copy"></i>
-                    <span>Copy</span>
-                </button>
-                <button onclick="refreshMail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
-                    <i class="fas fa-sync-alt"></i>
-                    <span>Refresh</span>
-                </button>
-                <button onclick="genEmail()" class="bg-gray-800 text-green-500 px-4 py-2 rounded-lg shadow-md flex items-center justify-center space-x-2 hover:bg-gray-700">
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Change</span>
-                </button>
-            </div>
-
-            <div class="bg-gray-800 rounded-lg shadow-lg p-4 flex-grow overflow-x-auto">
-                <table class="w-full table-auto">
-                    <thead>
-                        <tr class="bg-gray-700 text-green-500 p-2 rounded-t-lg">
-                            <th class="p-2 text-xs sm:text-sm">Mail</th>
-                        </tr>
-                    </thead>
-                    <tbody id="emails" class="text-gray-400">
-                        <tr>
-                            <td class="text-center p-6">
-                                <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
-                                <p class="text-lg">Your inbox is empty</p>
-                                <p>Waiting for incoming emails</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-          `);
-          refreshMail();
-          setupMenu();
+                <div class="bg-gray-800 rounded-lg shadow-lg p-4 flex-grow overflow-x-auto">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr class="bg-gray-700 text-green-500 p-2 rounded-t-lg">
+                                <th class="p-2 text-xs sm:text-sm" id="mail-header">${t.mail}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emails" class="text-gray-400">
+                            <tr>
+                                <td class="text-center p-6 w-full">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
+                                        <p class="text-lg">${t.emptyInbox}</p>
+                                        <p>${t.waiting}</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `);
+            refreshMail();
+            setupMenu();
         }
 
         function copyEmail() {
@@ -309,10 +376,11 @@
         }
 
         function showAbout() {
+          const t = translations[currentLang];
           const aboutContent = `
             <div class="text-center fade-in">
-                <h1 class="text-xl font-semibold mb-4">About This Website</h1>
-                <p>This website provides temporary, secure, anonymous, free, disposable email addresses. Forget about spam, advertising mailings, hacking, and attacking robots. Keep your real mailbox clean and secure.</p>
+                <h1 class="text-xl font-semibold mb-4">${t.aboutTitle}</h1>
+                <p>${t.aboutContent}</p>
             </div>
           `;
           $('#menu-content').html(aboutContent);
@@ -321,10 +389,11 @@
         }
 
         function showDeveloper() {
+          const t = translations[currentLang];
           const developerContent = `
             <div class="text-center fade-in">
-                <h1 class="text-xl font-semibold mb-4">Developer</h1>
-                <p>This website was developed by mowhn.</p>
+                <h1 class="text-xl font-semibold mb-4">${t.developerTitle}</h1>
+                <p>${t.developerContent}</p>
             </div>
           `;
           $('#menu-content').html(developerContent);
@@ -333,15 +402,68 @@
         }
 
         function showVersion() {
+          const t = translations[currentLang];
           const versionContent = `
             <div class="text-center fade-in">
-                <h1 class="text-xl font-semibold mb-4">Version</h1>
-                <p>Current version: 1.0.0</p>
+                <h1 class="text-xl font-semibold mb-4">${t.versionTitle}</h1>
+                <p>${t.versionContent}</p>
             </div>
           `;
           $('#menu-content').html(versionContent);
           $('#fullscreen-menu').addClass('hidden');
           $('#fullscreen-menu-content').removeClass('hidden');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            localStorage.setItem('language', currentLang);
+            updateUIText();
+        }
+
+        function updateUIText() {
+            const t = translations[currentLang];
+            
+            // 更新页面文本
+            $('#page-title').text(t.title);
+            $('.text-center.text-gray-400.mb-6 p').text(t.description);
+            $('button:contains("Copy"), button:contains("复制")').find('span').text(t.copy);
+            $('button:contains("Refresh"), button:contains("刷新")').find('span').text(t.refresh);
+            $('button:contains("Change"), button:contains("更换")').find('span').text(t.change);
+            
+            // 更新表头
+            $('#mail-header').text(t.mail);
+            
+            // 更新菜单项
+            $('a:contains("About"), a:contains("关于")').text(t.about);
+            $('a:contains("Developer"), a:contains("开发者")').text(t.developer);
+            $('a:contains("Version"), a:contains("版本")').text(t.version);
+            $('a:contains("Follow me on GitHub"), a:contains("在GitHub上关注我")').text(t.followGithub);
+            
+            // 更新空收件箱提示
+            if ($('#emails').find('td').length === 1) {
+                const emptyInbox = `
+                    <td class="text-center p-6 w-full">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-envelope-open-text text-4xl mb-4"></i>
+                            <p class="text-lg">${t.emptyInbox}</p>
+                            <p>${t.waiting}</p>
+                        </div>
+                    </td>
+                `;
+                $('#emails tr td').html(emptyInbox);
+            }
+
+            // 更新弹窗内容
+            if ($('#menu-content').is(':visible')) {
+                const currentContent = $('#menu-content').text();
+                if (currentContent.includes('About') || currentContent.includes('关于')) {
+                    showAbout();
+                } else if (currentContent.includes('Developer') || currentContent.includes('开发者')) {
+                    showDeveloper();
+                } else if (currentContent.includes('Version') || currentContent.includes('版本')) {
+                    showVersion();
+                }
+            }
         }
 
         $(document).ready(function() {
@@ -352,6 +474,7 @@
             genEmail();
           }
           setupMenu();
+          updateUIText(); // 初始化页面文本
         });
     </script>
 </body>
