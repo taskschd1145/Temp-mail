@@ -61,7 +61,7 @@
                 developerTitle: 'Developer',
                 developerContent: 'This website was developed by mowhn.',
                 versionTitle: 'Version',
-                versionContent: 'Current version: 1.1.0',
+                versionContent: 'Current version: 1.1.1',
                 mail: 'Mail',
                 yourTempEmail: 'Your Temporary Email Address',
                 pleaseGenerate: 'Please generate or input an email address first!'
@@ -84,9 +84,9 @@
                 aboutTitle: '关于本网站',
                 aboutContent: '本网站提供临时、安全、匿名、免费、一次性的电子邮件地址。告别垃圾邮件、广告邮件、黑客和攻击机器人，保持您的真实邮箱清洁和安全。',
                 developerTitle: '开发者',
-                developerContent: '本网站由 mowhn 开发。',
+                developerContent: '本网站由 mowhn 开发，由Taskschd1145增加简体中文。',
                 versionTitle: '版本',
-                versionContent: '当前版本：1.1.0',
+                versionContent: '当前版本：1.1.1',
                 mail: '邮件',
                 yourTempEmail: '您的临时邮箱地址',
                 pleaseGenerate: '请先生成或输入邮箱地址！'
@@ -418,6 +418,7 @@
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             localStorage.setItem('language', currentLang);
             updateUIText();
+            refreshMail();
         }
 
         function updateUIText() {
